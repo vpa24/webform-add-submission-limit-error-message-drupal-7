@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function webforms_custom_theme_registry_alter(&$theme_registry) {
+    // Defined path to the current module.
+    $module_path = drupal_get_path('module', 'webforms_custom');
+    // Find all .tpl.php files in this module's folder recursively.
+    $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path);
+    // Iterate through all found template file objects.
+    foreach ($template_file_objects as $key => $template_file_object) {
+        // If the template has not already been overridden by a theme.
+        if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+            // Alter the theme path and template elements.
+            $theme_registry[$key]['theme path'] = $module_path;
+            $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+            $theme_registry[$key]['type'] = 'module';
+        }
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function webforms_custom_menu() {
+  $items = array();
+
+  $items['admin/config/user-interface/webforms_custom'] = array(
+    'title' => 'Webforms Custom',
+    'description' => 'Configuration for Webforms custom module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('webforms_custom_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function webforms_custom_form($form, &$form_state) {
+  $form['submission_limit_error'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Submission limit error message'),
+    '#default_value' => variable_get('submission_limit_error', 'You have already submitted this form. Please try again later.'),
+    '#description' => t('The maximum number of links to display in the block.'),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}

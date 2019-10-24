@@ -1,0 +1,7 @@
+name = Webforms Custom
+description = Webforms tweaks for the TSA site.
+core = 7.x
+package = Custom
+
+configure = admin/config/user-interface/webforms_custom
+dependencies[] = webform
